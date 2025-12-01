@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IQ Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('https://images.unsplash.com/photo-1571019613575-2c1b22f5d5e7?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    .quiz-box {
+      margin: 50px auto;
+      width: 90%;
+      max-width: 500px;
+      background: rgba(10, 10, 20, 0.85);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px #00ffff;
+    }
+
+    .option {
+      background: #1a1a2e;
+      padding: 12px;
+      margin: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .option:hover {
+      background: #0f3460;
+    }
+
+    #timer {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #ff00ff;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #00ffff;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #0ff;
+    }
+
+    /* Fail message styling */
+    #failMessage {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #ff0055;
+      color: white;
+      padding: 20px 40px;
+      font-size: 26px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #ff00ff;
+      z-index: 9999;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>IQ Game</h1>
+
+<div class="quiz-box">
+  <h2 id="question">Loading question...</h2>
+  <p id="timer">Time: 10s</p>
+  <div id="options"></div>
+  <button onclick="nextQuestion()">Next</button>
+</div>
+
+<!-- Fail message div -->
+<div id="failMessage">ROUND LOST!</div>
+
+<script>
+// Questions array
+let questions = [
+  {q:"What is the capital of France?", options:["Paris","Rome","Berlin","Madrid"], answer:"Paris"},
+  {q:"What is 5 + 7?", options:["10","12","15","14"], answer:"12"},
+  {q:"Which planet is known as the Red Planet?", options:["Mars","Venus","Jupiter","Saturn"], answer:"Mars"},
+  {q:"What gas do plants absorb?", options:["Oxygen","Carbon Dioxide","Nitrogen","Hydrogen"], answer:"Carbon Dioxide"},
+  {q:"Which ocean is the largest?", options:["Atlantic","Indian","Arctic","Pacific"], answer:"Pacific"},
+  {q:"Who wrote 'Romeo and Juliet'?", options:["Shakespeare","Tolstoy","Hemingway","Dickens"], answer:"Shakespeare"},
+  {q:"What is the square root of 64?", options:["6","8","10","12"], answer:"8"},
+  {q:"Which animal is known as the King of the Jungle?", options:["Tiger","Lion","Elephant","Leopard"], answer:"Lion"},
+  {q:"What is H2O?", options:["Oxygen","Hydrogen","Water","Salt"], answer:"Water"},
+  {q:"Which country has the Great Wall?", options:["India","China","Japan","Korea"], answer:"China"},
+  {q:"What is the fastest land animal?", options:["Cheetah","Lion","Tiger","Horse"], answer:"Cheetah"},
+  {q:"Who painted the Mona Lisa?", options:["Van Gogh","Da Vinci","Picasso","Rembrandt"], answer:"Da Vinci"},
+  {q:"Which element has the symbol 'O'?", options:["Oxygen","Gold","Iron","Hydrogen"], answer:"Oxygen"},
+  {q:"How many continents are there?", options:["5","6","7","8"], answer:"7"},
+  {q:"Which is the largest planet?", options:["Earth","Mars","Jupiter","Saturn"], answer:"Jupiter"},
+  {q:"Which language is spoken in Brazil?", options:["Spanish","Portuguese","French","English"], answer:"Portuguese"},
+  {q:"What is the boiling point of water in Celsius?", options:["50","75","100","120"], answer:"100"},
+  {q:"Which month has 28 days?", options:["February","March","All months","April"], answer:"All months"},
+  {q:"Who discovered gravity?", options:["Newton","Einstein","Galileo","Tesla"], answer:"Newton"},
+  {q:"Which is the largest mammal?", options:["Elephant","Blue Whale","Giraffe","Hippopotamus"], answer:"Blue Whale"},
+  {q:"What is the currency of Japan?", options:["Yen","Dollar","Euro","Pound"], answer:"Yen"},
+  {q:"Which planet has rings?", options:["Mars","Saturn","Earth","Venus"], answer:"Saturn"},
+  {q:"Which organ pumps blood?", options:["Brain","Lungs","Heart","Liver"], answer:"Heart"},
+  {q:"Which continent is Egypt in?", options:["Asia","Europe","Africa","Australia"], answer:"Africa"},
+  {q:"Who is the author of 'Harry Potter'?", options:["Tolkien","Rowling","Lewis","Martin"], answer:"Rowling"},
+  {q:"Which is the smallest prime number?", options:["1","2","3","5"], answer:"2"},
+  {q:"Which gas do humans breathe in?", options:["Oxygen","Nitrogen","Carbon Dioxide","Helium"], answer:"Oxygen"},
+  {q:"Which instrument has keys?", options:["Guitar","Piano","Drums","Violin"], answer:"Piano"},
+  {q:"What color do you get by mixing red and blue?", options:["Green","Purple","Orange","Brown"], answer:"Purple"},
+  {q:"Which is the longest river?", options:["Nile","Amazon","Yangtze","Mississippi"], answer:"Nile"},
+  // Harder questions
+  {q:"If 3x + 5 = 20, what is x?", options:["3","5","7","10"], answer:"5"},
+  {q:"What is the next prime number after 31?", options:["33","37","39","41"], answer:"37"},
+  {q:"Which element has the atomic number 6?", options:["Carbon","Oxygen","Nitrogen","Helium"], answer:"Carbon"},
+  {q:"Who formulated the theory of relativity?", options:["Newton","Einstein","Galileo","Tesla"], answer:"Einstein"},
+  {q:"Which country has the most time zones?", options:["USA","Russia","France","China"], answer:"France"},
+  {q:"Solve for y: 2y - 4 = 10", options:["3","5","7","10"], answer:"7"},
+  {q:"Which planet is closest to the Sun?", options:["Mercury","Venus","Earth","Mars"], answer:"Mercury"},
+  {q:"What is the chemical formula for table salt?", options:["NaCl","KCl","Na2O","HCl"], answer:"NaCl"},
+  {q:"What is 15 x 12?", options:["170","180","190","200"], answer:"180"},
+  {q:"Which famous scientist studied electromagnetism?", options:["Faraday","Newton","Einstein","Darwin"], answer:"Faraday"},
+  {q:"What is the square of 15?", options:["205","215","225","235"], answer:"225"},
+  {q:"Which Greek philosopher taught Alexander the Great?", options:["Socrates","Plato","Aristotle","Pythagoras"], answer:"Aristotle"},
+  {q:"If a train travels 60 km in 1.5 hours, what is its speed?", options:["30 km/h","40 km/h","50 km/h","60 km/h"], answer:"40 km/h"},
+  {q:"Which blood type is known as the universal donor?", options:["A","B","O","AB"], answer:"O"},
+  {q:"Who painted 'The Starry Night'?", options:["Van Gogh","Da Vinci","Picasso","Monet"], answer:"Van Gogh"},
+  {q:"Which is the deepest ocean trench?", options:["Mariana Trench","Tonga Trench","Java Trench","Philippine Trench"], answer:"Mariana Trench"},
+  {q:"In binary, what is 1010 equal to in decimal?", options:["10","12","15","20"], answer:"10"},
+  {q:"What is the derivative of x²?", options:["x","2x","x²","2"], answer:"2x"},
+  {q:"Which is the largest desert in the world?", options:["Sahara","Gobi","Kalahari","Antarctica"], answer:"Antarctica"},
+  {q:"Which organ produces insulin?", options:["Liver","Pancreas","Kidney","Heart"], answer:"Pancreas"},
+  {q:"If a rectangle has length 12 and width 5, what is the area?", options:["60","55","65","50"], answer:"60"},
+  {q:"Who is known as the father of modern physics?", options:["Newton","Einstein","Galileo","Faraday"], answer:"Newton"},
+  {q:"Which number is both a square and a cube?", options:["16","64","36","125"], answer:"64"},
+  {q:"What is 7 factorial (7!)?", options:["5040","720","40320","840"], answer:"5040"},
+  {q:"Which country gifted the Statue of Liberty to USA?", options:["UK","France","Spain","Germany"], answer:"France"},
+  {q:"Which gas is most abundant in Earth's atmosphere?", options:["Oxygen","Nitrogen","Carbon Dioxide","Hydrogen"], answer:"Nitrogen"},
+  {q:"Which is the smallest planet in the solar system?", options:["Mercury","Mars","Venus","Pluto"], answer:"Mercury"},
+  {q:"What is the Fibonacci number after 13?", options:["21","20","19","18"], answer:"21"},
+  {q:"Which is the largest bone in the human body?", options:["Femur","Humerus","Tibia","Fibula"], answer:"Femur"},
+  {q:"What is the hardest natural substance?", options:["Diamond","Quartz","Gold","Iron"], answer:"Diamond"},
+  {q:"Which language has the most native speakers?", options:["English","Mandarin","Spanish","Hindi"], answer:"Mandarin"},
+  {q:"Which country won the first FIFA World Cup?", options:["Brazil","Uruguay","Italy","Germany"], answer:"Uruguay"},
+  {q:"Which famous mathematician is known for his 'Last Theorem'?", options:["Fermat","Euler","Gauss","Newton"], answer:"Fermat"},
+  {q:"What is the SI unit of electric current?", options:["Volt","Ampere","Ohm","Watt"], answer:"Ampere"},
+  {q:"Which planet is known for its Great Red Spot?", options:["Jupiter","Saturn","Mars","Neptune"], answer:"Jupiter"},
+  {q:"What is the atomic number of Helium?", options:["1","2","3","4"], answer:"2"},
+  {q:"Which organelle is the powerhouse of the cell?", options:["Nucleus","Mitochondria","Ribosome","Chloroplast"], answer:"Mitochondria"},
+  {q:"Who wrote 'The Odyssey'?", options:["Homer","Virgil","Sophocles","Aristotle"], answer:"Homer"},
+  {q:"What is the largest moon of Saturn?", options:["Titan","Ganymede","Europa","Callisto"], answer:"Titan"},
+  {q:"Which instrument measures atmospheric pressure?", options:["Thermometer","Barometer","Hygrometer","Anemometer"], answer:"Barometer"},
+  {q:"What is the value of Pi (approx)?", options:["3.141","3.142","3.143","3.144"], answer:"3.142"}
+];
+
+let current = 0;
+let timeLeft = 10;
+let timerInterval;
+let failMessages = ["YOU CAN DO IT!","ARE YOU EVEN SERIOUS?","POOR YOU!","HOW UNFORTUNATE!"];
+
+// Shuffle questions at start
+shuffleQuestions();
+loadQuestion();
+
+function loadQuestion() {
+  clearInterval(timerInterval);
+  let q = questions[current];
+  document.getElementById("question").innerText = q.q;
+
+  let optionsBox = document.getElementById("options");
+  optionsBox.innerHTML = "";
+
+  q.options.forEach(option => {
+    let div = document.createElement("div");
+    div.className = "option";
+    div.innerText = option;
+    div.onclick = () => checkAnswer(option);
+    optionsBox.appendChild(div);
+  });
+
+  resetTimer();
+}
+
+// Show fail message smoothly
+function showFailMessage(msg){
+  clearInterval(timerInterval);
+  let fm = document.getElementById("failMessage");
+  fm.innerText = "ROUND LOST! " + msg;
+  fm.style.display = "block";
+
+  setTimeout(()=>{
+    fm.style.display = "none";
+    current = 0;
+    shuffleQuestions();
+    loadQuestion();
+  }, 2500); // 2.5 seconds display
+}
+
+function checkAnswer(selected) {
+  clearInterval(timerInterval); // stop timer
+
+  let correct = questions[current].answer;
+
+  if(selected !== correct){
+    let msg = failMessages[Math.floor(Math.random() * failMessages.length)];
+    showFailMessage(msg);
+    return;
+  }
+
+  document.querySelectorAll(".option").forEach(opt => {
+    if(opt.innerText === correct) opt.style.background = "green";
+    opt.style.pointerEvents = "none";
+  });
+}
+
+function nextQuestion(){
+  current++;
+  if(current >= questions.length){
+    alert("Congratulations! You completed the IQ Game!");
+    current = 0;
+    shuffleQuestions();
+  }
+  loadQuestion();
+}
+
+function resetTimer(){
+  clearInterval(timerInterval);
+  timeLeft = 10;
+  document.getElementById("timer").innerText = "Time: "+timeLeft+"s";
+
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    document.getElementById("timer").innerText = "Time: "+timeLeft+"s";
+
+    if(timeLeft <= 0){
+      clearInterval(timerInterval);
+      let msg = failMessages[Math.floor(Math.random() * failMessages.length)];
+      showFailMessage("Time's up! " + msg);
+    }
+  },1000);
+}
+
+// Shuffle function
+function shuffleQuestions(){
+  for(let i = questions.length-1; i>0; i--){
+    let j = Math.floor(Math.random()*(i+1));
+    [questions[i], questions[j]] = [questions[j], questions[i]];
+  }
+}
+</script>
+
+</body>
+</html>
